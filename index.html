@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Arduino Помощник — локальный конструктор скетчей</title>
+<style>
+:root{--bg:#0b1220;--panel:#121d30;--panel2:#17243a;--line:#2a3b55;--text:#edf4ff;--muted:#9fb0c8;--accent:#62e6b5;--blue:#78aaff;--warn:#ffd27a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 0%,#1a3150 0,transparent 34%),var(--bg);color:var(--text);font:15px/1.5 system-ui,Segoe UI,Arial,sans-serif}
+header{padding:28px max(20px,calc((100% - 1180px)/2));border-bottom:1px solid var(--line);background:#0c1728dd}
+.brand{display:flex;align-items:center;gap:13px}.logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,var(--accent),#4b9eff);display:grid;place-items:center;color:#071321;font-size:24px;font-weight:900}
+h1{font-size:clamp(22px,4vw,31px);margin:0}header p{color:var(--muted);margin:6px 0 0}
+main{max-width:1180px;margin:24px auto;padding:0 18px 40px;display:grid;grid-template-columns:360px 1fr;gap:18px}
+.panel{background:linear-gradient(180deg,var(--panel),#101a2b);border:1px solid var(--line);border-radius:18px;padding:20px;min-width:0}
+h2{font-size:18px;margin:0 0 15px}.field{margin:0 0 14px}.field label{display:block;font-weight:650;margin-bottom:6px}.hint{font-size:12px;color:var(--muted);margin-top:5px}
+select,input{width:100%;background:#0b1525;border:1px solid #344760;color:var(--text);padding:11px 12px;border-radius:10px;font:inherit}
+input[type=range]{padding:0;accent-color:var(--accent)}.rangeLine{display:flex;justify-content:space-between;color:var(--muted);font-size:13px}
+button{border:0;border-radius:11px;padding:11px 15px;font:inherit;font-weight:750;cursor:pointer}
+.primary{background:var(--accent);color:#071a19}.secondary{background:#263a57;color:var(--text);border:1px solid #405675}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:15px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px}.tab{background:#1c2b42;color:var(--muted);border:1px solid var(--line)}.tab.active{background:#214d4b;color:#caffee;border-color:#398c78}
+.codehead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.codehead h2{margin:0}.code{background:#07101d;border:1px solid #273950;border-radius:13px;padding:17px;overflow:auto;min-height:460px;max-height:70vh;color:#d8e8ff;font:13px/1.6 Consolas,Monaco,monospace;white-space:pre}
+.notice{border:1px solid #67532b;background:#302817;color:#ffe4a8;padding:12px 14px;border-radius:12px;font-size:13px;margin-top:15px}
+.info{color:var(--muted);font-size:13px}.hidden{display:none}.pill{display:inline-block;background:#203b3a;color:#9af0d4;border-radius:20px;padding:4px 9px;font-size:11px;margin-bottom:12px}
+@media(max-width:850px){main{grid-template-columns:1fr}.code{max-height:none;min-height:420px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><div class="logo">A</div><div><h1>Arduino Помощник</h1><p>Локальный конструктор скетчей — работает без интернета и регистрации</p></div></div></header>
+<main>
+<section class="panel">
+ <span class="pill">100% локально · один HTML-файл</span>
+ <h2>Настройки проекта</h2>
+ <div class="field"><label for="board">Плата</label><select id="board"><option value="uno">Arduino Uno / Nano</option><option value="mega">Arduino Mega 2560</option><option value="esp">ESP32 (Arduino IDE)</option></select></div>
+ <div class="field"><label for="project">Что собираем?</label><select id="project"><option value="servo">Сервопривод</option><option value="led">Световая анимация (обычный светодиод)</option><option value="strip">Адресная LED-лента WS2812B</option><option value="distance">Ультразвуковой датчик расстояния HC-SR04</option><option value="pir">Датчик движения PIR</option><option value="combo">Умный механизм: датчик + сервопривод</option></select></div>
+ <div id="servoFields">
+  <div class="field"><label>Пин сервопривода</label><input id="servoPin" type="number" min="0" max="53" value="9"></div>
+  <div class="field"><label>Угол поворота: <span id="angleVal">90°</span></label><input id="angle" type="range" min="0" max="180" value="90"></div>
+  <div class="field"><label>Скорость движения (задержка между шагами)</label><select id="speed"><option value="5">Быстро — 5 мс</option><option value="15" selected>Средне — 15 мс</option><option value="30">Плавно — 30 мс</option><option value="60">Очень плавно — 60 мс</option></select></div>
+  <div class="field"><label>Режим</label><select id="servoMode"><option value="fixed">Установить заданный угол</option><option value="sweep">Плавно двигаться туда-обратно</option><option value="pulse">Периодическое движение между 0° и заданным углом</option></select></div>
+ </div>
+ <div id="ledFields" class="hidden">
+  <div class="field"><label>Пин светодиода / ленты</label><input id="ledPin" type="number" min="0" max="53" value="6"></div>
+  <div class="field"><label>Частота мигания / скорость анимации</label><select id="frequency"><option value="1">1 раз в секунду</option><option value="2" selected>2 раза в секунду</option><option value="5">5 раз в секунду</option><option value="10">10 раз в секунду</option></select></div>
+  <div class="field" id="countField"><label>Количество светодиодов в ленте</label><input id="ledCount" type="number" min="1" max="300" value="30"></div>
+  <div class="field" id="effectField"><label>Эффект</label><select id="effect"><option value="rainbow">Радуга</option><option value="pulse">Пульсация</option><option value="chase">Бегущий огонь</option></select></div>
+ </div>
+ <div id="sensorFields" class="hidden">
+  <div class="field"><label>TRIG / сигнальный пин</label><input id="trigPin" type="number" min="0" max="53" value="7"></div>
+  <div class="field"><label>ECHO (для HC-SR04)</label><input id="echoPin" type="number" min="0" max="53" value="8"></div>
+  <div class="field"><label>Порог расстояния (см)</label><input id="threshold" type="number" min="1" max="400" value="20"></div>
+ </div>
+ <div id="pirFields" class="hidden">
+  <div class="field"><label>Пин OUT датчика PIR</label><input id="pirPin" type="number" min="0" max="53" value="2"></div>
+  <div class="field"><label>Пин светодиода-индикатора</label><input id="pirLedPin" type="number" min="0" max="53" value="13"></div>
+ </div>
+ <div class="actions"><button class="primary" id="generate">Создать скетч</button><button class="secondary" id="reset">Сбросить</button></div>
+ <div class="notice">⚠️ Этот конструктор создаёт примеры для низковольтных Arduino-проектов. Не подключайте сетевое напряжение 220 В напрямую к плате. Для реле и бытовой электросети нужна готовая сертифицированная изоляция и помощь специалиста.</div>
+</section>
+<section class="panel">
+ <div class="codehead"><h2>Ваш Arduino-скетч</h2><button class="secondary" id="copy">Копировать код</button></div>
+ <div class="tabs"><button class="tab active" id="tabCode">Код .ino</button><button class="tab" id="tabGuide">Подключение</button></div>
+ <pre class="code" id="output"></pre>
+ <div id="guide" class="info hidden"></div>
+ <div class="actions"><button class="primary" id="download">Скачать .ino</button><button class="secondary" id="downloadGuide">Сохранить инструкцию .txt</button></div>
+ <p class="info">Скетч генерируется прямо в браузере. Никакие данные не отправляются и не сохраняются на сервере. Для компиляции откройте файл в Arduino IDE и при необходимости установите библиотеку, указанную в комментарии к скетчу.</p>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let currentCode='', currentGuide='';
+function showFields(){
+ const p=$('project').value;
+ $('servoFields').classList.toggle('hidden',!['servo','combo'].includes(p));
+ $('ledFields').classList.toggle('hidden',!['led','strip'].includes(p));
+ $('sensorFields').classList.toggle('hidden',!['distance','combo'].includes(p));
+ $('pirFields').classList.toggle('hidden',p!=='pir');
+ $('countField').classList.toggle('hidden',p!=='strip');
+ $('effectField').classList.toggle('hidden',p!=='strip');
+}
+$('project').addEventListener('change',showFields);
+$('angle').addEventListener('input',()=> $('angleVal').textContent=$('angle').value+'°');
+function pin(id){return Math.max(0,Math.min(53,Number($(id).value)||0))}
+function make(){
+ const p=$('project').value, board=$('board').value, a=Number($('angle').value), sp=pin('servoPin'), lp=pin('ledPin'), delay=Math.round(1000/Number($('frequency').value)), speed=Number($('speed').value);
+ let c='',g='';
+ if(p==='servo'){
+ c=`#include <Servo.h>\n\nServo myServo;\nconst int SERVO_PIN = ${sp};\nconst int TARGET_ANGLE = ${a};\n\nvoid setup() {\n  myServo.attach(SERVO_PIN);\n  myServo.write(0);\n  delay(500);\n}\n\nvoid loop() {\n${$('servoMode').value==='fixed'?'  myServo.write(TARGET_ANGLE);\\n  delay(1000);':$('servoMode').value==='sweep'?`  for (int angle = 0; angle <= TARGET_ANGLE; angle++) {\n    myServo.write(angle);\n    delay(${speed});\n  }\n  for (int angle = TARGET_ANGLE; angle >= 0; angle--) {\n    myServo.write(angle);\n    delay(${speed});\n  }`:`  myServo.write(TARGET_ANGLE);\n  delay(1000);\n  myServo.write(0);\n  delay(1000);`}\n}\n`;
+ g=`Сервопривод: сигнальный провод → D${sp}; питание сервопривода — по спецификации модели. Для большинства сервоприводов используйте отдельный подходящий источник питания, объедините GND источника и Arduino. Не перегружайте 5V платы. Угол: ${a}°.`;
+ } else if(p==='led'){
+ c=`const int LED_PIN = ${lp};\nconst unsigned long INTERVAL = ${delay};\nunsigned long previousMillis = 0;\nbool ledState = false;\n\nvoid setup() {\n  pinMode(LED_PIN, OUTPUT);\n}\n\nvoid loop() {\n  unsigned long now = millis();\n  if (now - previousMillis >= INTERVAL) {\n    previousMillis = now;\n    ledState = !ledState;\n    digitalWrite(LED_PIN, ledState ? HIGH : LOW);\n  }\n}\n`;
+ g=`Подключите анод светодиода через резистор 220–330 Ом к D${lp}, катод — к GND. Частота переключения: примерно ${$('frequency').value} Гц.`;
+ } else if(p==='strip'){
+ const n=Math.max(1,Math.min(300,Number($('ledCount').value)||30)), effect=$('effect').value;
+ c=`// Библиотека Adafruit NeoPixel: установите её через Library Manager Arduino IDE\n#include <Adafruit_NeoPixel.h>\n\n#define LED_PIN ${lp}\n#define LED_COUNT ${n}\nAdafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);\nuint16_t hue = 0;\n\nvoid setup() {\n  strip.begin();\n  strip.setBrightness(60); // Ограничение яркости\n  strip.show();\n}\n\nvoid loop() {\n${effect==='rainbow'?`  for (int i = 0; i < LED_COUNT; i++) {\n    strip.setPixelColor(i, strip.gamma32(strip.ColorHSV(hue + i * 65536L / LED_COUNT)));\n  }\n  strip.show();\n  hue += 256;\n  delay(${delay});`:effect==='pulse'?`  static int brightness = 0;\n  static int direction = 5;\n  brightness += direction;\n  if (brightness >= 180 || brightness <= 0) direction = -direction;\n  strip.setBrightness(brightness);\n  strip.fill(strip.Color(0, 80, 255));\n  strip.show();\n  delay(${delay});`:`  static int pos = 0;\n  strip.clear();\n  strip.setPixelColor(pos, strip.Color(255, 70, 0));\n  strip.show();\n  pos = (pos + 1) % LED_COUNT;\n  delay(${delay});`}\n}\n`;
+ g=`Лента WS2812B: DIN → D${lp}; GND ленты и GND Arduino соединить; питание ленты — отдельный источник 5 В подходящей мощности. Для длинной ленты используйте общий GND и защиту питания; не питайте ленту от вывода 5V Arduino. Частота обновления эффекта ориентировочно ${$('frequency').value} Гц.`;
+ } else if(p==='distance'){
+ const t=pin('trigPin'),e=pin('echoPin'),th=Number($('threshold').value)||20;
+ c=`const int TRIG_PIN = ${t};\nconst int ECHO_PIN = ${e};\nconst int LIMIT_CM = ${th};\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(TRIG_PIN, OUTPUT);\n  pinMode(ECHO_PIN, INPUT);\n}\n\nvoid loop() {\n  digitalWrite(TRIG_PIN, LOW);\n  delayMicroseconds(2);\n  digitalWrite(TRIG_PIN, HIGH);\n  delayMicroseconds(10);\n  digitalWrite(TRIG_PIN, LOW);\n  unsigned long duration = pulseIn(ECHO_PIN, HIGH, 30000UL);\n  float distanceCm = duration * 0.0343 / 2.0;\n  if (duration == 0) {\n    Serial.println(\"Нет эха / вне диапазона\");\n  } else {\n    Serial.print(\"Расстояние: \");\n    Serial.print(distanceCm);\n    Serial.println(\" см\");\n    if (distanceCm < LIMIT_CM) Serial.println(\"Объект близко!\");\n  }\n  delay(100);\n}\n`;
+ g=`HC-SR04: VCC → 5V, GND → GND, TRIG → D${t}, ECHO → D${e}. Для ESP32 или другой 3,3-вольтовой платы сигнал ECHO нужно согласовать делителем напряжения. Порог: ${th} см.`;
+ } else if(p==='pir'){
+ const s=pin('pirPin'),l=pin('pirLedPin');
+ c=`const int PIR_PIN = ${s};\nconst int LED_PIN = ${l};\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(PIR_PIN, INPUT);\n  pinMode(LED_PIN, OUTPUT);\n}\n\nvoid loop() {\n  bool motion = digitalRead(PIR_PIN) == HIGH;\n  digitalWrite(LED_PIN, motion ? HIGH : LOW);\n  Serial.println(motion ? \"Движение обнаружено\" : \"Движения нет\");\n  delay(200);\n}\n`;
+ g=`PIR: VCC → питание согласно маркировке модуля (обычно 5V), GND → GND, OUT → D${s}. Светодиод-индикатор через резистор → D${l}, катод → GND. После включения датчику может потребоваться время на стабилизацию.`;
+ } else {
+ const t=pin('trigPin'),e=pin('echoPin');
+ c=`// Датчик HC-SR04 управляет сервоприводом\n#include <Servo.h>\nconst int TRIG_PIN = ${t};\nconst int ECHO_PIN = ${e};\nconst int SERVO_PIN = ${sp};\nconst int LIMIT_CM = ${Number($('threshold').value)||20};\nServo gate;\n\nfloat readDistanceCm() {\n  digitalWrite(TRIG_PIN, LOW); delayMicroseconds(2);\n  digitalWrite(TRIG_PIN, HIGH); delayMicroseconds(10);\n  digitalWrite(TRIG_PIN, LOW);\n  unsigned long duration = pulseIn(ECHO_PIN, HIGH, 30000UL);\n  if (duration == 0) return -1;\n  return duration * 0.0343 / 2.0;\n}\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(TRIG_PIN, OUTPUT);\n  pinMode(ECHO_PIN, INPUT);\n  gate.attach(SERVO_PIN);\n  gate.write(0);\n}\n\nvoid loop() {\n  float cm = readDistanceCm();\n  if (cm > 0 && cm < LIMIT_CM) {\n    gate.write(${a}); // Открыть / повернуть\n  } else {\n    gate.write(0); // Вернуть в исходное положение\n  }\n  delay(100);\n}\n`;
+ g=`HC-SR04: TRIG → D${t}, ECHO → D${e}, VCC → 5V, GND → GND. Сервопривод: сигнал → D${sp}; питание сервопривода — от отдельного подходящего источника, GND общий с Arduino. При обнаружении объекта ближе ${Number($('threshold').value)||20} см сервопривод поворачивается на ${a}°.`;
+ }
+ if(board==='esp') g+='\\nПлата ESP32: проверьте допустимые GPIO для вашей модели. Для сервопривода и датчиков соблюдайте уровни 3,3 В; GPIO ESP32 не является 5-вольтовым.';
+ currentCode=c;currentGuide=g;$('output').textContent=c;$('guide').textContent=g;$('output').classList.remove('hidden');$('guide').classList.add('hidden');$('tabCode').classList.add('active');$('tabGuide').classList.remove('active');
+}
+$('generate').onclick=make;
+$('tabCode').onclick=()=>{$('output').classList.remove('hidden');$('guide').classList.add('hidden');$('tabCode').classList.add('active');$('tabGuide').classList.remove('active')};
+$('tabGuide').onclick=()=>{$('output').classList.add('hidden');$('guide').classList.remove('hidden');$('tabGuide').classList.add('active');$('tabCode').classList.remove('active')};
+$('copy').onclick=async()=>{if(!currentCode)make();try{await navigator.clipboard.writeText(currentCode);$('copy').textContent='Скопировано!'}catch(e){$('copy').textContent='Выделите код вручную'}};
+function save(name,content,type){const blob=new Blob([content],{type});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href)}
+$('download').onclick=()=>{if(!currentCode)make();save('arduino_sketch.ino',currentCode,'text/plain;charset=utf-8')};
+$('downloadGuide').onclick=()=>{if(!currentGuide)make();save('arduino_wiring_guide.txt',currentGuide,'text/plain;charset=utf-8')};
+$('reset').onclick=()=>{location.reload()};
+showFields();make();
+</script>
+</body></html>
